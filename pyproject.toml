@@ -1,0 +1,35 @@
+[project]
+name = "faststream-schema-registry"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Mark Lovretovich", email = "mlovretovich@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13,<4.0"
+dependencies = [
+    "faststream",
+    "dataclasses-avroschema==0.65.*",
+    "confluent-kafka[protobuf,schemaregistry,avro,json]",
+    "httpx",
+    "attrs",
+    "faststream[cli]",
+    "aiokafka",
+    "faker",
+    "dataclasses-avroschema[faker]",
+    "pydantic-settings",
+    "referencing",
+    "jsonschema",
+    "protobuf"
+]
+
+[tool.poetry]
+packages = [{include= "faststream_schema_registry", from = "src"}]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 79
