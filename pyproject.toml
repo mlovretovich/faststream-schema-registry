@@ -16,7 +16,7 @@ dependencies = [
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore::DeprecationWarning"
-addopts = "--cov=faststream_schema_registry --cov-report html"
+addopts = "--cov=faststream_schema_registry --cov-report xml:./coverage.xml"
 
 
 [tool.poetry]
