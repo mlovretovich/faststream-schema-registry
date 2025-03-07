@@ -6,7 +6,7 @@ authors = [
     {name = "Mark Lovretovich", email = "mlovretovich@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.13,<4.0"
+requires-python = ">=3.9,<4.0"
 dependencies = [
     "faststream",
     "dataclasses-avroschema==0.65.*",
@@ -16,8 +16,8 @@ dependencies = [
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore::DeprecationWarning"
-addopts = "--cov=faststream_schema_registry --cov-report xml:./coverage.xml"
-
+addopts = " -rP --cov=faststream_schema_registry --cov-report xml:coverage.xml -vvv"
+asyncio_mode = "auto"
 
 [tool.poetry]
 packages = [{include= "faststream_schema_registry", from = "src"}]
@@ -26,6 +26,7 @@ packages = [{include= "faststream_schema_registry", from = "src"}]
 pytest = "^6.0.0"
 pytest-mock = "*"
 pytest-cov = "*"
+pytest-asyncio = "*"
 
 
 [build-system]

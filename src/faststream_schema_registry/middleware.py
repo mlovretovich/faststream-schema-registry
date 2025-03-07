@@ -6,7 +6,7 @@ from faststream.broker.message import StreamMessage
 
 from faststream_schema_registry.registries import (
     BaseSchemaRegistry,
-    SchemaInfo, SchemaType
+    SchemaType,
 )
 
 
@@ -47,8 +47,6 @@ class SchemaRegistryMiddleware(BaseMiddleware):
         msg: Any,
         **options: Any,
     ) -> Any:
-        schema_info = SchemaInfo.from_message(msg, self.schema_type)
-
         message_encoded, headers = await self.schema_registry.serialize(
             msg, **options
         )

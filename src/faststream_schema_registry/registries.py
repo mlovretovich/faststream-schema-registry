@@ -89,7 +89,9 @@ class BaseSchemaRegistry(ABC):
 
         return subject, schema_str, schema_obj
 
-    async def serialize(self, msg: AvroModel, **options):
+    async def serialize(
+        self, msg: AvroModel, **options
+    ) -> typing.Tuple[bytes, dict[str, str]]:
         schema_info = SchemaInfo.from_message(msg, self.schema_type)
 
         message_encoded = await self.serializer.encode_record_with_schema(
