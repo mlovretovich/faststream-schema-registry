@@ -23,6 +23,7 @@ packages = [{include= "faststream_schema_registry", from = "src"}]
 [tool.poetry.group.test.dependencies]
 pytest = "^6.0.0"
 pytest-mock = "*"
+coverage = "*"
 
 
 [build-system]
