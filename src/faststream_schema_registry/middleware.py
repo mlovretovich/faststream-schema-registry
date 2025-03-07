@@ -1,53 +1,45 @@
 from functools import partial
 from typing import Any, Awaitable, Callable, Optional
 
-from confluent_kafka.serialization import MessageField, SerializationContext
 from faststream import BaseMiddleware
 from faststream.broker.message import StreamMessage
 
 from faststream_schema_registry.registries import (
-    AvroSchemaRegistry,
-    JSONSchemaRegistry,
+    BaseSchemaRegistry,
+    SchemaInfo, SchemaType
 )
 
 
 class SchemaRegistryMiddleware(BaseMiddleware):
+    schema_type: SchemaType
+
     def __init__(
         self,
         msg: Optional[Any],
         *,
-        registry: JSONSchemaRegistry | AvroSchemaRegistry,
+        schema_registry: BaseSchemaRegistry,
     ):
-        self.registry = registry
-
+        self.schema_registry = schema_registry
         super().__init__(msg)
 
     @classmethod
     def make_middleware(
-        cls,
-        registry: JSONSchemaRegistry | AvroSchemaRegistry,
+        cls, schema_registry: BaseSchemaRegistry
     ) -> Callable[[Any], "SchemaRegistryMiddleware"]:
         """
         Creates a partial function that can be used to instantiate the
         middleware.
         """
-        return partial(cls, registry=registry)
+        return partial(cls, schema_registry=schema_registry)
 
     async def consume_scope(
         self,
         call_next: Callable[[Any], Awaitable[Any]],
         msg: StreamMessage[Any],
     ) -> Any:
-        scheme_id = int.from_bytes(
-            msg.body[1:5], byteorder="big", signed=False
-        )
+        decoded_message = await self.schema_registry.deserialize(msg)
 
-        self.registry.client.get_schema(scheme_id)
-
-        new_msg = self.registry.deserializer(msg.body)
-        msg._decoded_body = new_msg
-
-        return await call_next(msg)
+        return await call_next(decoded_message)
 
     async def publish_scope(
         self,
@@ -55,11 +47,12 @@ class SchemaRegistryMiddleware(BaseMiddleware):
         msg: Any,
         **options: Any,
     ) -> Any:
-        ctx = SerializationContext(
-            field=MessageField.value,
-            topic=options["topic"],
-            headers=options["headers"],
-        )
-        headers, new_msg = self.registry.serialize(msg, ctx)
+        schema_info = SchemaInfo.from_message(msg, self.schema_type)
 
-        return await call_next(new_msg, **options)
+        message_encoded, headers = await self.schema_registry.serialize(
+            msg, **options
+        )
+
+        return await call_next(message_encoded, **options)
+
+    #
