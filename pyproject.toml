@@ -16,6 +16,8 @@ dependencies = [
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore::DeprecationWarning"
+addopts = "--cov=<project-name> --cov-report html"
+
 
 [tool.poetry]
 packages = [{include= "faststream_schema_registry", from = "src"}]
@@ -23,7 +25,7 @@ packages = [{include= "faststream_schema_registry", from = "src"}]
 [tool.poetry.group.test.dependencies]
 pytest = "^6.0.0"
 pytest-mock = "*"
-coverage = "*"
+pytest-cov = "*"
 
 
 [build-system]
