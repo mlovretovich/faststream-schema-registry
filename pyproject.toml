@@ -7,12 +7,6 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.9,<4.0"
-dependencies = [
-    "faststream",
-    "dataclasses-avroschema==0.65.*",
-    "python-schema-registry-client",
-    "faker"
-]
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore::DeprecationWarning"
@@ -22,10 +16,19 @@ asyncio_mode = "auto"
 [tool.poetry]
 packages = [{include= "faststream_schema_registry", from = "src"}]
 
+[tool.poetry.dependencies]
+faststream = "0.5.*"
+python-schema-registry-client = "2.6.*"
+dataclasses-avroschema = {extras = ["faker","pydantic"], version = "0.65.*"}
+
+
+
 [tool.poetry.group.test.dependencies]
-pytest = "^6.0.0"
-pytest-mock = "*"
-pytest-cov = "*"
+mypy = "^1"
+ruff = ">=0.8,<0.10"
+pytest = ">=7,<9"
+pytest-cov = ">=4,<6"
+pytest-mock = "^3.10.0"
 pytest-asyncio = "*"
 codecov = "^2.1.13"
 

@@ -100,15 +100,10 @@ class BaseSchemaRegistry(ABC):
         schema_id = int.from_bytes(
             message_encoded[1:5], byteorder="big", signed=False
         )
-        new_headers = {
-            "schema-id": str(schema_id),
-            "subject": schema_info.subject,
-        }
-        headers = options.get("headers", {})
-        if headers:
-            headers.update(new_headers)
-        else:
-            headers = new_headers
+
+        headers = options.get("headers") or {}
+        headers["schema-id"] = str(schema_id)
+        headers["subject"] = schema_info.subject
 
         return message_encoded, headers
 
