@@ -13,8 +13,15 @@ filterwarnings = "ignore::DeprecationWarning"
 addopts = " -rP --cov=faststream_schema_registry"
 asyncio_mode = "auto"
 
+
+[tool.pytest.ini_options]
+filterwarnings = "ignore::DeprecationWarning"
+addopts = " -rP --cov=faststream_schema_registry"
+asyncio_mode = "auto"
+
 [tool.poetry]
 packages = [{include= "faststream_schema_registry", from = "src"}]
+
 
 [tool.poetry.dependencies]
 faststream = "0.5.*"
@@ -29,6 +36,7 @@ ruff = ">=0.8,<0.10"
 pytest = ">=7,<9"
 pytest-cov = ">=4,<6"
 pytest-mock = "^3.10.0"
+
 pytest-asyncio = "*"
 codecov = "^2.1.13"
 

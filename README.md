@@ -1,4 +1,5 @@
 # faststream-schema-registry
+
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/mlovretovich/faststream-schema-registry/python-app.yml)
 [![codecov](https://codecov.io/gh/mlovretovich/faststream-schema-registry/graph/badge.svg?token=NJNZZ3D35Y)](https://codecov.io/gh/mlovretovich/faststream-schema-registry)
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://img.shields.io/badge/python-3.9+-blue.svg)
@@ -16,6 +17,7 @@ python 3.9+
 ```bash
 pip install faststream-schema-registry
 ```
+
 ## Examples
 Serialize objects using either the AvroSchemaRegistry or the JsonSchemaRegistry
 ### AvroSchemaRegistry
@@ -55,6 +57,7 @@ async def test():
 @broker.subscriber("messages")
 async def on_messages(msg: Message):
     print(msg)
+
 
 ```
 
