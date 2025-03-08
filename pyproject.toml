@@ -16,7 +16,7 @@ dependencies = [
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore::DeprecationWarning"
-addopts = " -rP --cov=faststream_schema_registry --cov-report xml:coverage.xml -vvv"
+addopts = " -rP --cov=faststream_schema_registry"
 asyncio_mode = "auto"
 
 [tool.poetry]
@@ -27,6 +27,7 @@ pytest = "^6.0.0"
 pytest-mock = "*"
 pytest-cov = "*"
 pytest-asyncio = "*"
+codecov = "^2.1.13"
 
 
 [build-system]

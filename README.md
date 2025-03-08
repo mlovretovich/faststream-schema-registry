@@ -6,6 +6,10 @@ Middleware for async avro/json serialization using the confluent schema registry
 
 ## Requirements
 python 3.9+
+## Installation
+```bash
+pip install faststream-schema-registry
+```
 ## Usage
 ### AvroSchemaRegistry
 ```python

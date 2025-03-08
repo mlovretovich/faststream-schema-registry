@@ -60,16 +60,13 @@ jobs:
     #----------------------------------------------
     # install your root project, if required
     #----------------------------------------------
-    - name: Install project
-      run: poetry install --no-interaction
-        #----------------------------------------------
-        #              run test suite
-        #----------------------------------------------
     - name: Run tests
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       run: |
-        source .venv/bin/activate
-        pytest tests/
-        coverage report
+        poetry install --all-extras
+        poetry run pytest --cov=faststream_schema_registry ${1}
+        poetry run codecov --token=$CODECOV_TOKEN
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
