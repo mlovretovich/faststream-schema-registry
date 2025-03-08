@@ -1,30 +1,33 @@
 [project]
 name = "faststream-schema-registry"
-version = "0.1.0"
+version = "0.1.3a1"
 description = ""
 authors = [
     {name = "Mark Lovretovich", email = "mlovretovich@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.13,<4.0"
+requires-python = ">=3.9,<4.0"
 dependencies = [
     "faststream",
     "dataclasses-avroschema==0.65.*",
-    "confluent-kafka[protobuf,schemaregistry,avro,json]",
-    "httpx",
-    "attrs",
-    "faststream[cli]",
-    "aiokafka",
-    "faker",
-    "dataclasses-avroschema[faker]",
-    "pydantic-settings",
-    "referencing",
-    "jsonschema",
-    "protobuf"
+    "python-schema-registry-client",
+    "faker"
 ]
+
+[tool.pytest.ini_options]
+filterwarnings = "ignore::DeprecationWarning"
+addopts = " -rP --cov=faststream_schema_registry"
+asyncio_mode = "auto"
 
 [tool.poetry]
 packages = [{include= "faststream_schema_registry", from = "src"}]
+
+[tool.poetry.group.test.dependencies]
+pytest = "^6.0.0"
+pytest-mock = "*"
+pytest-cov = "*"
+pytest-asyncio = "*"
+codecov = "^2.1.13"
 
 
 [build-system]

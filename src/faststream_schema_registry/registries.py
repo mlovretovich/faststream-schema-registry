@@ -1,168 +1,144 @@
-import io
 import json
 import typing
-from typing import Callable, ParamSpec, Type, TypeVar, Union
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from enum import Enum
 
-import fastavro
-from confluent_kafka.schema_registry import (
-    Schema,
-    SchemaRegistryClient,
-    record_subject_name_strategy,
-)
-from confluent_kafka.schema_registry.avro import (
-    AvroDeserializer,
-    AvroSerializer,
-)
-from confluent_kafka.schema_registry.json_schema import (
-    JSONDeserializer,
-    JSONSerializer,
-)
-from confluent_kafka.serialization import SerializationContext
 from dataclasses_avroschema import AvroModel
-from dataclasses_avroschema.pydantic import AvroBaseModel
+from faststream.broker.message import StreamMessage
+from schema_registry.client import (
+    AsyncSchemaRegistryClient,
+    schema as client_schema,
+)
+from schema_registry.client.schema import AvroSchema, BaseSchema, JsonSchema
+from schema_registry.serializers import (
+    AsyncAvroMessageSerializer,
+    AsyncMessageSerializer,
+)
+from schema_registry.serializers import (
+    AsyncJsonMessageSerializer,
+)
 
-from faststream_schema_registry.models import SchemaInfo, SchemaType
-from faststream_schema_registry.utils import TimedLRUCache
 
-P = ParamSpec("P")
-T = TypeVar("T")
+class SchemaType(Enum):
+    Avro = "AVRO"
+    Json = "JSON"
 
 
-class BaseSchemaRegistry:
-    _default_conf = {"subject.name.strategy": record_subject_name_strategy}
-    serializer: Callable[[str], Union[JSONSerializer, AvroSerializer]]
+@dataclass
+class SchemaInfo:
+    subject: str
+    schema_str: str
+    schema_obj: BaseSchema
+
+    @classmethod
+    def from_message(cls, msg: AvroModel, schema_type: SchemaType):
+        schema_get = {
+            SchemaType.Json: (
+                "model_json_schema",
+                {"mode": "validation"},
+                JsonSchema,
+            ),
+            SchemaType.Avro: ("avro_schema_to_python", {}, AvroSchema),
+        }
+
+        func, kwargs, schema_transformer = schema_get[schema_type]
+        schema = msg.__getattribute__(func)(**kwargs)
+        subject = msg.get_fullname()
+
+        return cls(
+            subject=subject,
+            schema_str=json.dumps(schema),
+            schema_obj=schema_transformer(schema),
+        )
+
+
+class BaseSchemaRegistry(ABC):
+    "A base Schema Registry classs"
+
     schema_type: SchemaType
 
-    def __init__(
-        self,
-        url: str,
-        cache_ttl: int,
-        conf: typing.Optional[dict] = None,
-        **kwargs,
-    ):
-        self.url = url
-        self.cache_ttl = cache_ttl
-        self.client = SchemaRegistryClient(
-            {
-                "url": url,
-                "cache.latest.ttl.sec": cache_ttl,
-            }
-        )
+    def __init__(self, url: str):
+        self.schema_registry_client = AsyncSchemaRegistryClient(url)
 
-        self._schema_cache = TimedLRUCache(max_size=1000, ttl=cache_ttl)
+    @property
+    @abstractmethod
+    def serializer(self) -> AsyncMessageSerializer: ...
 
-        conf_copy = self._default_conf.copy()
-        if conf is not None:
-            conf_copy.update(conf)
-
-        self.conf = conf_copy
-
-    def _extract_schema_info(
-        self, msg: Union[AvroModel, AvroBaseModel]
-    ) -> typing.Tuple[str, str]:
+    def _get_schema_from_message(
+        self, msg: AvroModel
+    ) -> typing.Tuple[str, str, client_schema.BaseSchema]:
         schema_get = {
-            SchemaType.Json: ("model_json_schema", {"mode": "validation"}),
-            SchemaType.Avro: ("avro_schema_to_python", {}),
+            SchemaType.Json: (
+                "model_json_schema",
+                {"mode": "validation"},
+                client_schema.JsonSchema,
+            ),
+            SchemaType.Avro: (
+                "avro_schema_to_python",
+                {},
+                client_schema.AvroSchema,
+            ),
         }
-        func, kwargs = schema_get[self.schema_type]
-        schema = msg.__getattr__(func)(**kwargs)
-        subject = schema["name"]
 
-        if "namespace" in schema:
-            subject = f"{schema['namespace']}.{['name']}"
+        func, kwargs, schema_transformer = schema_get[self.schema_type]
+        schema = msg.__getattribute__(func)(**kwargs)
+        subject = msg.get_fullname()
+        schema_str = json.dumps(schema)
+        schema_obj = schema_transformer(schema)
 
-        return subject, str(schema)
+        return subject, schema_str, schema_obj
 
-    def _build_serializer(
-        self, serializer: Union[JSONSerializer, AvroSerializer], **kwargs
-    ):
-        conf = self.conf.copy()
-        conf["auto.register.schemas"] = bool(False)
-        return serializer(
-            schema_registry_client=self.client, conf=conf, **kwargs
+    async def serialize(
+        self, msg: AvroModel, **options
+    ) -> typing.Tuple[bytes, dict[str, str]]:
+        schema_info = SchemaInfo.from_message(msg, self.schema_type)
+
+        message_encoded = await self.serializer.encode_record_with_schema(
+            schema_info.subject, schema_info.schema_obj, msg.to_dict()
         )
-
-    def _build_deserializer(
-        self,
-        deserializer: Union[Type[JSONDeserializer], Type[AvroDeserializer]],
-        **kwargs,
-    ):
-        return deserializer(
-            schema_registry_client=self.client, conf=self.conf, **kwargs
+        schema_id = int.from_bytes(
+            message_encoded[1:5], byteorder="big", signed=False
         )
-
-    def _lookup_schema(self, subject, schema_str: str):
-        registered_schema = self._schema_cache[
-            (subject, self.schema_type.value)
-        ]
-        if not registered_schema:
-            registered_schema = self.client.get_latest_version(
-                subject_name=subject
-            )
-            if not registered_schema:
-                registered_schema = self.client.register_schema_full_response(
-                    subject_name=subject, schema=Schema(schema_str=schema_str)
-                )
-            self._schema_cache[(subject, self.schema_type.value)] = (
-                registered_schema
-            )
-
-        return registered_schema
-
-    def serialize(self, msg: AvroModel, ctx: SerializationContext):
-        schema = SchemaInfo.from_message(msg, self.schema_type)
-
-        reg_schema = self._lookup_schema(schema.subject, schema.schema_strj)
-
-        bytes_writer = io.BytesIO()
-        fastavro.schemaless_writer(
-            fo=bytes_writer,
-            schema=json.loads(reg_schema.schema.schema_str),
-            record=msg.to_dict(),
-        )
-
-        new_msg = (
-            b"\x00"
-            + reg_schema.schema_id.to_bytes(4, byteorder="big")
-            + bytes_writer.getvalue()
-        )
-
-        headers = {
-            "schema-id": str(reg_schema.schema_id),
-            "subject": reg_schema.subject,
+        new_headers = {
+            "schema-id": str(schema_id),
+            "subject": schema_info.subject,
         }
-        return headers, new_msg
+        headers = options.get("headers", {})
+        if headers:
+            headers.update(new_headers)
+        else:
+            headers = new_headers
 
+        return message_encoded, headers
 
-class JSONSchemaRegistry(BaseSchemaRegistry):
-    schema_type = SchemaType.Json
-
-    def __init__(
-        self,
-        url: str,
-        cache_ttl: int,
-        conf: typing.Optional[dict] = None,
-        **kwargs,
-    ):
-        super().__init__(url, cache_ttl, conf, **kwargs)
-
-        self.serializer = self._build_serializer(JSONSerializer, **kwargs)
-        self.deserializer = self._build_deserializer(JSONDeserializer)
+    async def deserialize(
+        self, msg: StreamMessage[typing.Any]
+    ) -> StreamMessage[typing.Any]:
+        decoded_message = await self.serializer.decode_message(msg.body)
+        msg._decoded_body = decoded_message
+        return msg
 
 
 class AvroSchemaRegistry(BaseSchemaRegistry):
+    "Schema Registry for Avro schemas"
+
     schema_type = SchemaType.Avro
 
-    def __init__(
-        self,
-        url: str,
-        cache_ttl: int,
-        conf: typing.Optional[dict] = None,
-        **kwargs,
-    ):
-        super().__init__(url, cache_ttl, conf, **kwargs)
+    @property
+    def serializer(self) -> AsyncAvroMessageSerializer:
+        return AsyncAvroMessageSerializer(
+            schemaregistry_client=self.schema_registry_client
+        )
 
-        self.serializer = self._build_serializer(AvroSerializer, **kwargs)
-        self.deserializer = self._build_deserializer(
-            AvroDeserializer, **kwargs
+
+class JsonSchemaRegistry(BaseSchemaRegistry):
+    "Schema Registry for Json schemas"
+
+    schema_type = SchemaType.Json
+
+    @property
+    def serializer(self) -> AsyncJsonMessageSerializer:
+        return AsyncJsonMessageSerializer(
+            schemaregistry_client=self.schema_registry_client
         )
