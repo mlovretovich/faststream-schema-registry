@@ -14,11 +14,6 @@ addopts = " -rP --cov=faststream_schema_registry"
 asyncio_mode = "auto"
 
 
-[tool.pytest.ini_options]
-filterwarnings = "ignore::DeprecationWarning"
-addopts = " -rP --cov=faststream_schema_registry"
-asyncio_mode = "auto"
-
 [tool.poetry]
 packages = [{include= "faststream_schema_registry", from = "src"}]
 
