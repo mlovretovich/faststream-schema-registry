@@ -1,4 +1,6 @@
 # faststream-schema-registry
+[![codecov](https://codecov.io/gh/mlovretovich/faststream-schema-registry/graph/badge.svg?token=NJNZZ3D35Y)](https://codecov.io/gh/mlovretovich/faststream-schema-registry)
+
 Middleware for async avro/json serialization using the confluent schema registry
 ### Uses:
 * [python-schema-registry-client](https://github.com/marcosschroh/python-schema-registry-client)
