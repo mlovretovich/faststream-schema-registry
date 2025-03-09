@@ -37,16 +37,16 @@ jobs:
           virtualenvs-in-project: true
           virtualenvs-path: .venv
           installer-parallel: true
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            .tox
-            .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-${{ matrix.python-version }}
+#      - name: Load cached venv
+#        id: cached-poetry-dependencies
+#        uses: actions/cache@v4
+#        with:
+#          path: |
+#            .tox
+#            .venv
+#          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+#          restore-keys: |
+#            venv-${{ runner.os }}-${{ matrix.python-version }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install
