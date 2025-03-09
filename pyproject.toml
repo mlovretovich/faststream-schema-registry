@@ -6,11 +6,18 @@ authors = [
     {name = "Mark Lovretovich", email = "mlovretovich@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "boto3",
+    "dataclasses-avroschema[pydantic]",
+    "python-schema-registry-client",
+    "faststream"
+
+]
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore::DeprecationWarning"
-addopts = " -rP --cov=faststream_schema_registry"
+addopts = " -v -s --cov=faststream_schema_registry"
 asyncio_mode = "auto"
 
 
@@ -22,7 +29,7 @@ packages = [{include= "faststream_schema_registry", from = "src"}]
 faststream = "0.5.*"
 python-schema-registry-client = "2.6.*"
 dataclasses-avroschema = {extras = ["faker","pydantic"], version = "0.65.*"}
-
+sanic = "*"
 
 
 [tool.poetry.group.test.dependencies]
@@ -31,9 +38,9 @@ ruff = ">=0.8,<0.10"
 pytest = ">=7,<9"
 pytest-cov = ">=4,<6"
 pytest-mock = "^3.10.0"
-
 pytest-asyncio = "*"
 codecov = "^2.1.13"
+tox = "*"
 
 
 [build-system]
