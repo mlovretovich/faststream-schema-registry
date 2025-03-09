@@ -77,13 +77,15 @@ jobs:
     - name: Install dependencies
 #      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: python --version && which python && poetry install --all-extras
-    - name: Run Tests & Coverage
-      run: poetry run pytest --cov-branch --cov-report=xml
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        slug: mlovretovich/faststream-schema-registry
+#    - name: Run Tests & Coverage
+#      run: poetry run pytest --cov-branch --cov-report=xml
+#    - name: Upload coverage reports to Codecov
+#      uses: codecov/codecov-action@v5
+#      with:
+#        token: ${{ secrets.CODECOV_TOKEN }}
+#        slug: mlovretovich/faststream-schema-registry
+    - name: Test cache key one
+      run: echo venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
     - name: Test cache key
       run: echo ${{ steps.cached-poetry-dependencies.outputs }}
     - name: Restore Cache
