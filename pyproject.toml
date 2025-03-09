@@ -10,6 +10,7 @@ requires-python = ">=3.10,<4.0"
 dependencies = [
     "boto3",
     "dataclasses-avroschema[pydantic]",
+    "python-schema-registry-client"
 
 ]
 
@@ -38,6 +39,7 @@ pytest-cov = ">=4,<6"
 pytest-mock = "^3.10.0"
 pytest-asyncio = "*"
 codecov = "^2.1.13"
+tox = "*"
 
 
 [build-system]
