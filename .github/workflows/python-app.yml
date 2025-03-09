@@ -69,7 +69,7 @@ jobs:
     - name: Test output key
       run: echo ${{ steps.setup-python.outputs.python-version }} && echo ${{ runner.os }} && echo ${{ hashFiles('**/poetry.lock') }}
     - name: Load cached venv
-      id: cached-poetry-dependencies
+      id: restore-cache
       uses: actions/cache@v4
       with:
         path: .venv
@@ -85,12 +85,12 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: mlovretovich/faststream-schema-registry
     - name: Test cache key
-      run: echo ${{ steps.cached-poetry-dependencies.outputs.cache-primary-key }}
+      run: echo ${{ steps.cached-poetry-dependencies.outputs }}
     - name: Restore Cache
       uses: actions/cache/save@v4
       with:
         path: .venv
-        key: ${{ steps.cached-poetry-dependencies.outputs.cache-primary-key }}
+        key: ${{ steps.restore-cache.outputs.cache-primary-key }}
 
 #    - name: build release distributions
 #      run: |
