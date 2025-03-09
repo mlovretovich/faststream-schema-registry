@@ -23,7 +23,7 @@ packages = [{include= "faststream_schema_registry", from = "src"}]
 faststream = "0.5.*"
 python-schema-registry-client = "2.6.*"
 dataclasses-avroschema = {extras = ["faker","pydantic"], version = "0.65.*"}
-
+black="*"
 
 
 [tool.poetry.group.test.dependencies]

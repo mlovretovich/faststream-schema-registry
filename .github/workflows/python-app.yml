@@ -74,32 +74,19 @@ jobs:
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-
     - name: Install dependencies
 #      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: python --version && which python && poetry install --all-extras
-#    - name: Run Tests & Coverage
-#      run: poetry run pytest --cov-branch --cov-report=xml
-#    - name: Upload coverage reports to Codecov
-#      uses: codecov/codecov-action@v5
-#      with:
-#        token: ${{ secrets.CODECOV_TOKEN }}
-#        slug: mlovretovich/faststream-schema-registry
-    - name: Dump GitHub Actions context
-      run: |
-        echo "Dumping context for debugging"
-        env
-    - name: Display all outputs as JSON
-      run: |
-        echo "${{ toJSON(steps) }}"
-    - name: Test cache key one
-      run: echo venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
-    - name: Test cache key
-      run: echo ${{ join(steps.restore-cache.outputs.*, ',') }}
-    - name: Restore Cache
-      uses: actions/cache/save@v4
+      run: python --version && which python && poetry install
+    - name: Run Tests & Coverage
+      run: poetry run pytest --cov-branch --cov-report=xml
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
       with:
-        path: .venv
-        key: ${{ steps.restore-cache.outputs.cache-primary-key }}
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: mlovretovich/faststream-schema-registry
+
 
 #    - name: build release distributions
 #      run: |
