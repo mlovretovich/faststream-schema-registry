@@ -31,7 +31,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install tox tox-gh-actions
       - name: Output
-        run: echo ${{ fromJSON(steps) }}
+        run: echo ${{ steps.setup-python.outputs.python-version }}
+#        echo ${{ fromJSON(steps) }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
