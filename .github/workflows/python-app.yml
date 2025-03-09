@@ -74,9 +74,6 @@ jobs:
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
-    #----------------------------------------------
-    # install dependencies if cache does not exist
-    #----------------------------------------------
     - name: Install dependencies
 #      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: python --version && which python && poetry install --all-extras
@@ -87,8 +84,9 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: mlovretovich/faststream-schema-registry
+    - name: Test cache key
+      run: echo ${{ steps.cached-poetry-dependencies.outputs.cache-primary-key }}
     - name: Restore Cache
-
       uses: actions/cache/save@v4
       with:
         path: .venv
