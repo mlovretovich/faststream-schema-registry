@@ -10,7 +10,7 @@ requires-python = ">=3.10,<4.0"
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore::DeprecationWarning"
-addopts = "-v -s"
+addopts = " -v -s --cov=faststream_schema_registry"
 asyncio_mode = "auto"
 
 
