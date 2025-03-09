@@ -87,7 +87,7 @@ jobs:
     - name: Test cache key one
       run: echo venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
     - name: Test cache key
-      run: echo ${{ steps.restore-cache.outputs }}
+      run: echo ${{ join(steps.restore-cache.outputs, ',') }}
     - name: Restore Cache
       uses: actions/cache/save@v4
       with:
