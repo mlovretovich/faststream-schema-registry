@@ -90,7 +90,7 @@ jobs:
         env
     - name: Display all outputs as JSON
       run: |
-        echo "${{ toJSON(steps.restore-cache.outputs) }}"
+        echo "${{ toJSON(steps) }}"
     - name: Test cache key one
       run: echo venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
     - name: Test cache key
