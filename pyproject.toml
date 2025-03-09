@@ -6,11 +6,11 @@ authors = [
     {name = "Mark Lovretovich", email = "mlovretovich@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore::DeprecationWarning"
-addopts = " -rP --cov=faststream_schema_registry"
+addopts = "-v -s"
 asyncio_mode = "auto"
 
 

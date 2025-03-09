@@ -4,15 +4,10 @@ from typing import Any, Awaitable, Callable, Optional
 from faststream import BaseMiddleware
 from faststream.broker.message import StreamMessage
 
-from faststream_schema_registry.registries import (
-    BaseSchemaRegistry,
-    SchemaType,
-)
+from faststream_schema_registry.registries import BaseSchemaRegistry
 
 
 class SchemaRegistryMiddleware(BaseMiddleware):
-    schema_type: SchemaType
-
     def __init__(
         self,
         msg: Optional[Any],

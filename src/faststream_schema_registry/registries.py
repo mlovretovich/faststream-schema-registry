@@ -4,12 +4,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 
-from dataclasses_avroschema import AvroModel
+from dataclasses_avroschema.pydantic import AvroBaseModel
 from faststream.broker.message import StreamMessage
-from schema_registry.client import (
-    AsyncSchemaRegistryClient,
-    schema as client_schema,
-)
+from schema_registry.client import AsyncSchemaRegistryClient
 from schema_registry.client.schema import AvroSchema, BaseSchema, JsonSchema
 from schema_registry.serializers import (
     AsyncAvroMessageSerializer,
@@ -32,7 +29,7 @@ class SchemaInfo:
     schema_obj: BaseSchema
 
     @classmethod
-    def from_message(cls, msg: AvroModel, schema_type: SchemaType):
+    def from_message(cls, msg: AvroBaseModel, schema_type: SchemaType):
         schema_get = {
             SchemaType.Json: (
                 "model_json_schema",
@@ -66,36 +63,28 @@ class BaseSchemaRegistry(ABC):
     def serializer(self) -> AsyncMessageSerializer: ...
 
     def _get_schema_from_message(
-        self, msg: AvroModel
-    ) -> typing.Tuple[str, str, client_schema.BaseSchema]:
-        schema_get = {
-            SchemaType.Json: (
-                "model_json_schema",
-                {"mode": "validation"},
-                client_schema.JsonSchema,
-            ),
-            SchemaType.Avro: (
-                "avro_schema_to_python",
-                {},
-                client_schema.AvroSchema,
-            ),
-        }
-
-        func, kwargs, schema_transformer = schema_get[self.schema_type]
-        schema = msg.__getattribute__(func)(**kwargs)
+        self, msg: AvroBaseModel
+    ) -> typing.Tuple[str, str, BaseSchema]:
         subject = msg.get_fullname()
-        schema_str = json.dumps(schema)
-        schema_obj = schema_transformer(schema)
 
-        return subject, schema_str, schema_obj
+        match self.schema_type:
+            case SchemaType.Json:
+                schema = msg.model_json_schema(mode="validation")
+                return subject, json.dumps(schema), JsonSchema(schema)
+
+            case SchemaType.Avro:
+                schema = msg.avro_schema_to_python()
+                return subject, json.dumps(schema), AvroSchema(schema)
+            case _:
+                print("got here")
 
     async def serialize(
-        self, msg: AvroModel, **options
+        self, msg: AvroBaseModel, **options
     ) -> typing.Tuple[bytes, dict[str, str]]:
-        schema_info = SchemaInfo.from_message(msg, self.schema_type)
+        subject, schema_str, schema_obj = self._get_schema_from_message(msg)
 
         message_encoded = await self.serializer.encode_record_with_schema(
-            schema_info.subject, schema_info.schema_obj, msg.to_dict()
+            subject, schema_obj, msg.to_dict()
         )
         schema_id = int.from_bytes(
             message_encoded[1:5], byteorder="big", signed=False
@@ -103,7 +92,7 @@ class BaseSchemaRegistry(ABC):
 
         headers = options.get("headers") or {}
         headers["schema-id"] = str(schema_id)
-        headers["subject"] = schema_info.subject
+        headers["subject"] = subject
 
         return message_encoded, headers
 
