@@ -44,7 +44,7 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            venv-${{ runner.os }}-${{ matrix.python-version }}-
+            venv-${{ runner.os }}-${{ matrix.python-version }}
       - name: Test with tox
         run: tox
   build:
