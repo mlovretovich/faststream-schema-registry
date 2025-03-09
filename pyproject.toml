@@ -10,7 +10,8 @@ requires-python = ">=3.10,<4.0"
 dependencies = [
     "boto3",
     "dataclasses-avroschema[pydantic]",
-    "python-schema-registry-client"
+    "python-schema-registry-client",
+    "faststream"
 
 ]
 
