@@ -66,6 +66,8 @@ jobs:
       #----------------------------------------------
       #       load cached venv if cache exists
       #----------------------------------------------
+    - name: Test output key
+      run: echo ${{ steps.setup-python.outputs.python-version }}
     - name: Load cached venv
       id: cached-poetry-dependencies
       uses: actions/cache@v4
