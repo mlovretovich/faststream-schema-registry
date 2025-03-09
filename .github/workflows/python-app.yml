@@ -84,6 +84,10 @@ jobs:
 #      with:
 #        token: ${{ secrets.CODECOV_TOKEN }}
 #        slug: mlovretovich/faststream-schema-registry
+    - name: Dump GitHub Actions context
+      run: |
+        echo "Dumping context for debugging"
+        env
     - name: Test cache key one
       run: echo venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
     - name: Test cache key
