@@ -43,6 +43,8 @@ jobs:
 #        with:
 #          path: .venv
 #          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+#          restore-keys: |
+#            venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-
 #      - name: Test with tox
 #        run: tox
   build:
@@ -77,8 +79,8 @@ jobs:
         restore-keys: |
           venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-
     - name: Install dependencies
-#      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: python --version && which python && poetry install
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install
     - name: Run Tests & Coverage
       run: poetry run pytest --cov-branch --cov-report=xml
     - name: Upload coverage reports to Codecov
