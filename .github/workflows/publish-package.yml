@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://test.pypi.org/project/faststream-schema-registry/
+      url: https://pypi.org/project/faststream-schema-registry/
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:

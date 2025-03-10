@@ -27,6 +27,8 @@ class SchemaRegistryMiddleware(BaseMiddleware):
         Creates a partial function that can be used to instantiate the
         middleware.
 
+        Args:
+            schema_registry(BaseSchemaRegistry): Schema Registry
         """
         return partial(cls, schema_registry=schema_registry)
 
