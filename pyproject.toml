@@ -11,7 +11,8 @@ dependencies = [
     "boto3",
     "dataclasses-avroschema[pydantic]",
     "python-schema-registry-client",
-    "faststream"
+    "faststream",
+    "faker"
 
 ]
 
@@ -29,7 +30,6 @@ packages = [{include= "faststream_schema_registry", from = "src"}]
 faststream = "0.5.*"
 python-schema-registry-client = "2.6.*"
 dataclasses-avroschema = {extras = ["faker","pydantic"], version = "0.65.*"}
-sanic = "*"
 
 
 [tool.poetry.group.test.dependencies]
@@ -42,6 +42,13 @@ pytest-asyncio = "*"
 codecov = "^2.1.13"
 tox = "*"
 
+
+
+[tool.poetry.group.dev.dependencies]
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.6.7"
+pytkdocs = {version = "^0.16.5", extras = ["numpy-style"]}
+mkdocstrings = {version = "^0.28.3", extras = ["python"]}
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

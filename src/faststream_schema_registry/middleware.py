@@ -8,6 +8,8 @@ from faststream_schema_registry.registries import BaseSchemaRegistry
 
 
 class SchemaRegistryMiddleware(BaseMiddleware):
+    "SchemaRegistryMiddleware"
+
     def __init__(
         self,
         msg: Optional[Any],
@@ -24,6 +26,7 @@ class SchemaRegistryMiddleware(BaseMiddleware):
         """
         Creates a partial function that can be used to instantiate the
         middleware.
+
         """
         return partial(cls, schema_registry=schema_registry)
 
@@ -34,7 +37,9 @@ class SchemaRegistryMiddleware(BaseMiddleware):
     ) -> Any:
         decoded_message = await self.schema_registry.deserialize(msg)
 
-        return await call_next(decoded_message)
+        msg._decoded_body = decoded_message
+
+        return await call_next(msg)
 
     async def publish_scope(
         self,

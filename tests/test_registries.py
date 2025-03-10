@@ -68,16 +68,16 @@ async def test_avro_schema_registry(
     return_value, headers = await registry.serialize(message_with_namespace)
 
     assert isinstance(
-        registry.schema_registry_client, AsyncSchemaRegistryClient
+        registry._schema_registry_client, AsyncSchemaRegistryClient
     )
-    assert isinstance(registry.serializer, AsyncAvroMessageSerializer)
+    assert isinstance(registry._serializer, AsyncAvroMessageSerializer)
     encode_record_with_schema.assert_called_once_with(
         subject,
         schema_obj,
         message_with_namespace.to_dict(),
     )
     assert headers["schema-id"] == "1"
-    assert headers["subject"] == "com.testing.MessageWithNamespace"
+    assert headers["schema-subject"] == "com.testing.MessageWithNamespace"
 
 
 @patch.object(AsyncJsonMessageSerializer, "encode_record_with_schema")
@@ -101,13 +101,13 @@ async def test_json_schema_registry(
     return_value, headers = await registry.serialize(message_with_namespace)
 
     assert isinstance(
-        registry.schema_registry_client, AsyncSchemaRegistryClient
+        registry._schema_registry_client, AsyncSchemaRegistryClient
     )
-    assert isinstance(registry.serializer, AsyncJsonMessageSerializer)
+    assert isinstance(registry._serializer, AsyncJsonMessageSerializer)
     encode_record_with_schema.assert_called_once_with(
         subject,
         schema_obj,
         message_with_namespace.to_dict(),
     )
     assert headers["schema-id"] == "1"
-    assert headers["subject"] == "com.testing.MessageWithNamespace"
+    assert headers["schema-subject"] == "com.testing.MessageWithNamespace"
