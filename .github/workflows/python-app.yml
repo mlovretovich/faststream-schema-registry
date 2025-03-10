@@ -21,8 +21,6 @@ jobs:
         python-version: [ '3.10', '3.11', '3.12', '3.13' ]
     steps:
       - uses: actions/checkout@v3
-      - name: Run Changelog CI
-        uses: saadmk11/changelog-ci@v1.1.2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
