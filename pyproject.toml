@@ -6,11 +6,19 @@ authors = [
     {name = "Mark Lovretovich", email = "mlovretovich@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "boto3",
+    "dataclasses-avroschema[pydantic]",
+    "python-schema-registry-client",
+    "faststream",
+    "faker"
+
+]
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore::DeprecationWarning"
-addopts = " -rP --cov=faststream_schema_registry"
+addopts = " -v -s --cov=faststream_schema_registry"
 asyncio_mode = "auto"
 
 
@@ -24,17 +32,23 @@ python-schema-registry-client = "2.6.*"
 dataclasses-avroschema = {extras = ["faker","pydantic"], version = "0.65.*"}
 
 
-
 [tool.poetry.group.test.dependencies]
 mypy = "^1"
 ruff = ">=0.8,<0.10"
 pytest = ">=7,<9"
 pytest-cov = ">=4,<6"
 pytest-mock = "^3.10.0"
-
 pytest-asyncio = "*"
 codecov = "^2.1.13"
+tox = "*"
 
+
+
+[tool.poetry.group.dev.dependencies]
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.6.7"
+pytkdocs = {version = "^0.16.5", extras = ["numpy-style"]}
+mkdocstrings = {version = "^0.28.3", extras = ["python"]}
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

@@ -1,13 +1,11 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Python application
+name: Python Publish To Pypi
 
 on:
   push:
-    branches: [ "main", "develop" ]
-  pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -93,35 +91,31 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: mlovretovich/faststream-schema-registry
+    - name: build release distributions
+      run: |
+        # NOTE: put your own distribution build steps here.
+        poetry build
+    - name: upload dists
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-dists
+        path: dist/
 
-
-#    - name: build release distributions
-#      run: |
-#        # NOTE: put your own distribution build steps here.
-#        poetry build
-#    - name: upload dists
-#      uses: actions/upload-artifact@v4
-#      with:
-#        name: release-dists
-#        path: dist/
-
-#  pypi-publish:
-#    name: Upload release to PyPI
-#    needs: build
-#    runs-on: ubuntu-latest
-#    environment:
-#      name: pypi
-#      url: https://test.pypi.org/project/faststream-schema-registry/
-#    permissions:
-#      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
-#    steps:
-#      # retrieve your distributions here
-#      - name: Retrieve release distributions
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: release-dists
-#          path: dist/
-#      - name: Publish package distributions to PyPI
-#        uses: pypa/gh-action-pypi-publish@release/v1
-#        with:
-#          repository-url: https://test.pypi.org/legacy/
+  pypi-publish:
+    name: Upload release to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://test.pypi.org/project/faststream-schema-registry/
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    steps:
+      # retrieve your distributions here
+      - name: Retrieve release distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: release-dists
+          path: dist/
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
