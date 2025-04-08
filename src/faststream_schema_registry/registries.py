@@ -20,6 +20,9 @@ class SchemaType(Enum):
     Json = "JSON"
 
 
+BaseModel = AvroBaseModel
+
+
 class BaseSchemaRegistry(ABC):
     _schema_type: SchemaType
 
